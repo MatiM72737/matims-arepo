@@ -1,6 +1,6 @@
 # 🐢 MatiM Alpine Repository
 
-[![GitHub Pages](https://img.shields.io/badge/Web-Interface-blue?style=flat-square)](https://MatiM.github.io/matims-arepo/)
+[![GitHub Pages](https://img.shields.io/badge/Web-Interface-blue?style=flat-square)](https://matim72737.github.io/matims-arepo/)
 [![Alpine Linux](https://img.shields.io/badge/Alpine-Linux-0d597f?style=flat-square&logo=alpine-linux&logoColor=white)](https://alpinelinux.org/)
 
 A professional-grade, personal Alpine Linux package repository (APK) hosted on **Hugging Face Datasets** and served via a custom **Vue 3** dashboard.
