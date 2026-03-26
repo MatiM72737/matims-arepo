@@ -18,6 +18,9 @@ importers:
       '@types/node':
         specifier: ^24.12.0
         version: 24.12.0
+      '@types/pako':
+        specifier: ^2.0.4
+        version: 2.0.4
       '@vitejs/plugin-vue':
         specifier: ^6.0.5
         version: 6.0.5(vite@8.0.3(@types/node@24.12.0))(vue@3.5.31(typescript@5.9.3))
@@ -192,6 +195,9 @@ packages:
 
   '@types/node@24.12.0':
     resolution: {integrity: sha512-GYDxsZi3ChgmckRT9HPU0WEhKLP08ev/Yfcq2AstjrDASOYCSXeyjDsHg4v5t4jOj7cyDX3vmprafKlWIG9MXQ==}
+
+  '@types/pako@2.0.4':
+    resolution: {integrity: sha512-VWDCbrLeVXJM9fihYodcLiIv0ku+AlOa/TQ1SvYOaBuyrSKgEcro95LJyIsJ4vSo6BXIxOKxiJAat04CmST9Fw==}
 
   '@vitejs/plugin-vue@6.0.5':
     resolution: {integrity: sha512-bL3AxKuQySfk1iGcBsQnoRVexTPJq0Z/ixFVM8OhVJAP6ZXXXLtM7NFKWhLl30Kg7uTBqIaPXbh+nuQCuBDedg==}
@@ -755,6 +761,8 @@ snapshots:
   '@types/node@24.12.0':
     dependencies:
       undici-types: 7.16.0
+
+  '@types/pako@2.0.4': {}
 
   '@vitejs/plugin-vue@6.0.5(vite@8.0.3(@types/node@24.12.0))(vue@3.5.31(typescript@5.9.3))':
     dependencies:
