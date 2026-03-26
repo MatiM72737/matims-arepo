@@ -14,24 +14,27 @@ export interface Package {
 
 const REPO_ID = "MatiM72737/matims-arepo";
 
-// STAN GLOBALNY
+// STAN GLOBALNY - Domyślnie ustawiamy na "all"
 const branches = ref<string[]>([]);
 const selectedBranch = ref("main");
-const selectedRepo = ref("");
-const selectedArch = ref("");
+const selectedRepo = ref("all");
+const selectedArch = ref("all");
 const selectedMaintainer = ref("all");
 const searchQuery = ref("");
 const allPackages = ref<Package[]>([]);
 
-// Listy dynamiczne wykryte z plików
-const availableRepos = ref<string[]>([]);
-const availableArchs = ref<string[]>([]);
+// Surowe listy wykryte z plików na HF
+const availableReposRaw = ref<string[]>([]);
+const availableArchsRaw = ref<string[]>([]);
 
 const loading = ref(false);
 const error = ref<string | null>(null);
 
 export function usePackages() {
-  // Funkcja skanująca strukturę plików na HF
+  // Listy dla Selectów - "all" jest zawsze pierwszą opcją
+  const availableRepos = computed(() => ["all", ...availableReposRaw.value]);
+  const availableArchs = computed(() => ["all", ...availableArchsRaw.value]);
+
   const scanStructure = async () => {
     try {
       const res = await fetch(
@@ -39,7 +42,6 @@ export function usePackages() {
       );
       const files = await res.json();
 
-      // Wyciągamy unikalne repozytoria i architektury na podstawie ścieżek plików APK
       const repos = new Set<string>();
       const archs = new Set<string>();
 
@@ -47,21 +49,27 @@ export function usePackages() {
         if (f.path.endsWith(".apk")) {
           const parts = f.path.split("/");
           if (parts.length >= 3) {
-            repos.add(parts[0]); // np. community
-            archs.add(parts[1]); // np. x86_64
+            repos.add(parts[0]);
+            archs.add(parts[1]);
           }
         }
       });
 
-      availableRepos.value = Array.from(repos).sort();
-      availableArchs.value = Array.from(archs).sort();
+      availableReposRaw.value = Array.from(repos).sort();
+      availableArchsRaw.value = Array.from(archs).sort();
 
-      // Ustaw domyślne wartości, jeśli aktualne są puste lub już nie istnieją
-      if (!availableRepos.value.includes(selectedRepo.value)) {
-        selectedRepo.value = availableRepos.value[0] || "";
+      // Upewniamy się, że jeśli ktoś miał wybrane coś, czego już nie ma, wracamy do "all"
+      if (
+        selectedRepo.value !== "all" &&
+        !availableReposRaw.value.includes(selectedRepo.value)
+      ) {
+        selectedRepo.value = "all";
       }
-      if (!availableArchs.value.includes(selectedArch.value)) {
-        selectedArch.value = availableArchs.value[0] || "";
+      if (
+        selectedArch.value !== "all" &&
+        !availableArchsRaw.value.includes(selectedArch.value)
+      ) {
+        selectedArch.value = "all";
       }
     } catch (e) {
       console.error("Błąd skanowania struktury:", e);
@@ -84,47 +92,73 @@ export function usePackages() {
   };
 
   const fetchData = async () => {
-    // Nie strzelaj w API, jeśli nie mamy jeszcze wykrytych ścieżek
-    if (!selectedRepo.value || !selectedArch.value) return;
-
     loading.value = true;
     error.value = null;
-    try {
-      const url = `https://huggingface.co/datasets/${REPO_ID}/resolve/${selectedBranch.value}/${selectedRepo.value}/${selectedArch.value}/APKINDEX.tar.gz`;
-      const res = await fetch(url);
+    allPackages.value = []; // Czyścimy przed nowym pobieraniem
 
-      if (!res.ok)
-        throw new Error(
-          `Brak indeksu w ${selectedRepo.value}/${selectedArch.value}`,
-        );
+    // Ustalamy, co dokładnie musimy pobrać
+    const reposToFetch =
+      selectedRepo.value === "all"
+        ? availableReposRaw.value
+        : [selectedRepo.value];
+    const archsToFetch =
+      selectedArch.value === "all"
+        ? availableArchsRaw.value
+        : [selectedArch.value];
 
-      const buffer = await res.arrayBuffer();
-      const decompressed = pako.ungzip(new Uint8Array(buffer));
-      const text = new TextDecoder().decode(decompressed);
+    // Budujemy listę zapytań
+    const fetchPromises = [];
 
-      allPackages.value = text
-        .split("\n\n")
-        .filter((block) => block.trim().length > 10)
-        .map((block) => {
-          const f: any = {};
-          block.split("\n").forEach((line) => {
-            if (line.length > 2) f[line[0]] = line.substring(2);
+    for (const repo of reposToFetch) {
+      for (const arch of archsToFetch) {
+        const url = `https://huggingface.co/datasets/${REPO_ID}/resolve/${selectedBranch.value}/${repo}/${arch}/APKINDEX.tar.gz`;
+
+        // Każde zapytanie obsługuje własne błędy, żeby brak jednego folderu nie wysadził reszty
+        const fetchPromise = fetch(url)
+          .then(async (res) => {
+            if (!res.ok) return []; // Folder/indeks nie istnieje - ignorujemy
+
+            const buffer = await res.arrayBuffer();
+            const decompressed = pako.ungzip(new Uint8Array(buffer));
+            const text = new TextDecoder().decode(decompressed);
+
+            return text
+              .split("\n\n")
+              .map((block) => {
+                const f: any = {};
+                block.split("\n").forEach((line) => {
+                  if (line.length > 2) f[line[0]] = line.substring(2);
+                });
+
+                if (!f["P"]) return null; // Ignoruj puste bloki i "Unknown"
+
+                return {
+                  name: f["P"],
+                  version: f["V"] || "0",
+                  description: f["T"] || "",
+                  arch: arch, // Zapisujemy z jakiego to przyszło zapytania
+                  repo: repo,
+                  maintainer: f["m"] || "Unknown",
+                  size: parseInt(f["I"]) || 0,
+                  path: `${repo}/${arch}/${f["P"]}-${f["V"]}.apk`,
+                };
+              })
+              .filter((p): p is Package => p !== null);
+          })
+          .catch(() => {
+            return []; // W razie błędu sieciowego zwracamy pustą listę dla tego folderu
           });
-          return {
-            name: f["P"] || null,
-            version: f["V"] || "0",
-            description: f["T"] || "",
-            arch: selectedArch.value,
-            repo: selectedRepo.value,
-            maintainer: f["m"] || "Unknown",
-            size: parseInt(f["I"]) || 0,
-            path: `${selectedRepo.value}/${selectedArch.value}/${f["P"]}-${f["V"]}.apk`,
-          };
-        })
-        .filter((p) => p.name !== null);
+
+        fetchPromises.push(fetchPromise);
+      }
+    }
+
+    try {
+      // Czekamy aż WSZYSTKIE pobierania się zakończą i spłaszczamy wyniki do jednej tablicy
+      const results = await Promise.all(fetchPromises);
+      allPackages.value = results.flat();
     } catch (e: any) {
-      error.value = e.message;
-      allPackages.value = [];
+      error.value = "Wystąpił błąd podczas pobierania paczek.";
     } finally {
       loading.value = false;
     }
@@ -147,13 +181,11 @@ export function usePackages() {
     });
   });
 
-  // Kiedy zmienisz branch, musimy od nowa przeskanować strukturę folderów
   watch(selectedBranch, async () => {
     await scanStructure();
     await fetchData();
   });
 
-  // Zmiana filtrów repo/arch ładuje tylko nowy indeks
   watch([selectedRepo, selectedArch], fetchData);
 
   return {
@@ -172,14 +204,16 @@ export function usePackages() {
     availableMaintainers,
     fetchBranches,
     fetchData,
-    scanStructure, // Dodajemy do zwrotu
+    scanStructure,
     REPO_NAME: REPO_ID,
     rawUrlBase: computed(
       () =>
         `https://huggingface.co/datasets/${REPO_ID}/resolve/${selectedBranch.value}/`,
     ),
     copyToClipboard: () => {
-      const url = `https://huggingface.co/datasets/${REPO_ID}/resolve/${selectedBranch.value}/${selectedRepo.value}`;
+      // Jeśli wybrano 'all', URL nie ma sensu w kontekście apk add, kopiujemy bazę
+      const repoPath = selectedRepo.value === "all" ? "" : selectedRepo.value;
+      const url = `https://huggingface.co/datasets/${REPO_ID}/resolve/${selectedBranch.value}/${repoPath}`;
       navigator.clipboard.writeText(url);
       alert("URL skopiowany!");
     },
