@@ -11,7 +11,7 @@ To integrate this repository into your Alpine Linux environment, execute the fol
 
 ```bash
 # Add the repository to your apk repositories list
-echo "[https://huggingface.co/datasets/MatiM72737/matims-arepo/resolve/main](https://huggingface.co/datasets/MatiM72737/matims-arepo/resolve/main)" >> /etc/apk/repositories
+echo "https://huggingface.co/datasets/MatiM72737/matims-arepo/resolve/main/community" >> /etc/apk/repositories
 
 # Update your local package index
 apk update

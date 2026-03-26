@@ -13,8 +13,9 @@ const loading = ref(true);
 const error = ref<string | null>(null);
 
 const REPO_NAME = "MatiM72737/matims-arepo";
-const API_URL = `https://huggingface.co/api/datasets/${REPO_NAME}/tree/main?recursive=true`;
-const RAW_URL_BASE = `https://huggingface.co/datasets/${REPO_NAME}/resolve/main`;
+const BRANCH_NAME = "main";
+const API_URL = `https://huggingface.co/api/datasets/${REPO_NAME}/tree/${BRANCH_NAME}?recursive=true`;
+const RAW_URL_BASE = `https://huggingface.co/datasets/${REPO_NAME}/resolve/${BRANCH_NAME}/`;
 
 const fetchData = async () => {
   try {
@@ -45,7 +46,7 @@ const formatSize = (b: number) => {
 };
 
 const copyToClipboard = () => {
-  const fullUrl = `${RAW_URL_BASE}/edge/community`; // Kopiujemy pełną ścieżkę
+  const fullUrl = `${RAW_URL_BASE}/community`; // Kopiujemy pełną ścieżkę
   navigator.clipboard.writeText(fullUrl);
   alert("Repository URL copied!");
 };
@@ -91,9 +92,7 @@ onMounted(fetchData);
             target="_blank"
             >Dataset Info</a
           >
-          <a
-            href="https://github.com/matim72737/matims-arepo-webpage"
-            target="_blank"
+          <a href="https://github.com/matim72737/matims-arepo" target="_blank"
             >GitHub</a
           >
         </nav>
@@ -107,7 +106,7 @@ onMounted(fetchData);
           </div>
           <div class="command-box">
             <code
-              >echo "{{ RAW_URL_BASE }}/edge/community" | sudo tee -a
+              >echo "{{ RAW_URL_BASE }}/community" | sudo tee -a
               /etc/apk/repositories</code
             >
             <button @click="copyToClipboard" class="btn-secondary">
