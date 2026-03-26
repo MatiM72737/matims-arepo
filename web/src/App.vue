@@ -12,7 +12,7 @@ const searchQuery = ref("");
 const loading = ref(true);
 const error = ref<string | null>(null);
 
-const REPO_NAME = "MatiM/matims-arepo";
+const REPO_NAME = "MatiM72737/matims-arepo";
 const API_URL = `https://huggingface.co/api/datasets/${REPO_NAME}/tree/main?recursive=true`;
 const RAW_URL_BASE = `https://huggingface.co/datasets/${REPO_NAME}/resolve/main`;
 
