@@ -25,7 +25,7 @@ onMounted(async () => {
         <PackageTable />
       </main>
       <footer class="main-footer">
-        <p>MatiM Arepo &copy; 2024 - Alpine Linux Custom Repository</p>
+        <p>MatiM72737 Arepo &copy; 2024 - Alpine Linux Custom Repository</p>
       </footer>
     </div>
   </div>

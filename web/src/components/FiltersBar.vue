@@ -1,25 +1,44 @@
 <template>
-  <div class="filters-wrapper card">
-    <div class="filter-grid">
-      <div class="filter-item">
+  <div class="filters-container card">
+    <div class="filter-row">
+      <div class="field">
+        <label>Package name</label>
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="e.g. niri"
+          class="search-input"
+        />
+      </div>
+      <div class="field">
         <label>Branch</label>
         <select v-model="selectedBranch">
           <option v-for="b in branches" :key="b" :value="b">{{ b }}</option>
         </select>
       </div>
-
-      <div class="filter-item">
+      <div class="field">
         <label>Repository</label>
         <select v-model="selectedRepo">
           <option v-for="r in availableRepos" :key="r" :value="r">
-            {{ r === "all" ? "Wszystkie" : r }}
+            {{ r }}
           </option>
         </select>
       </div>
-
-      <div class="filter-item search">
-        <label>Szukaj paczki</label>
-        <input v-model="searchQuery" placeholder="np. niri..." type="text" />
+      <div class="field">
+        <label>Architecture</label>
+        <select v-model="selectedArch">
+          <option v-for="a in availableArchs" :key="a" :value="a">
+            {{ a }}
+          </option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Maintainer</label>
+        <select v-model="selectedMaintainer">
+          <option v-for="m in availableMaintainers" :key="m" :value="m">
+            {{ m }}
+          </option>
+        </select>
       </div>
     </div>
   </div>
@@ -27,38 +46,47 @@
 
 <script setup lang="ts">
 import { usePackages } from "../composables/usePackages";
-const { branches, selectedBranch, selectedRepo, availableRepos, searchQuery } =
-  usePackages();
+const {
+  branches,
+  selectedBranch,
+  selectedRepo,
+  selectedArch,
+  selectedMaintainer,
+  searchQuery,
+  availableRepos,
+  availableArchs,
+  availableMaintainers,
+} = usePackages();
 </script>
 
 <style scoped>
-.filter-grid {
-  display: flex;
-  gap: 1.5rem;
-  padding: 1.5rem;
-  flex-wrap: wrap;
+.filter-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr;
+  gap: 10px;
+  padding: 15px;
 }
-.filter-item {
+.field {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 5px;
 }
-.filter-item label {
-  font-size: 0.8rem;
+label {
+  font-size: 12px;
   color: var(--text-muted);
   font-weight: bold;
-  text-transform: uppercase;
 }
-select,
-input {
-  background: var(--bg-app);
+input,
+select {
+  background: #111;
   border: 1px solid var(--border);
   color: white;
-  padding: 0.6rem;
-  border-radius: 6px;
-  min-width: 150px;
+  padding: 8px;
+  border-radius: 4px;
 }
-.search {
-  flex: 1;
+@media (max-width: 900px) {
+  .filter-row {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 </style>

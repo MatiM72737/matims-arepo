@@ -1,46 +1,40 @@
 <template>
-  <div v-if="loading" class="status-box">
-    <div class="spinner"></div>
-    <p>Pobieranie danych z Hugging Face...</p>
-  </div>
+  <div v-if="loading" class="status-box"><div class="spinner"></div></div>
 
-  <div v-else class="table-container card">
-    <table>
+  <div v-else class="table-wrapper card">
+    <table class="alpine-table">
       <thead>
         <tr>
-          <th>Paczka</th>
-          <th>Repozytorium</th>
-          <th>Architektura</th>
-          <th>Rozmiar</th>
-          <th>Akcja</th>
+          <th>Package</th>
+          <th>Version</th>
+          <th>Branch</th>
+          <th>Repository</th>
+          <th>Architecture</th>
+          <th>Maintainer</th>
+          <th>Size</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="pkg in filteredPackages" :key="pkg.sha">
-          <td class="pkg-name">{{ pkg.name }}</td>
+          <td class="col-main">
+            <a :href="`${rawUrlBase}${pkg.path}`" target="_blank">{{
+              pkg.name
+            }}</a>
+          </td>
+          <td class="col-version">{{ pkg.version }}</td>
           <td>
-            <span class="badge">{{ pkg.repo }}</span>
+            <span class="text-dim">{{ selectedBranch }}</span>
+          </td>
+          <td>
+            <span class="text-accent">{{ pkg.repo }}</span>
           </td>
           <td>
             <code>{{ pkg.arch }}</code>
           </td>
-          <td>{{ formatSize(pkg.size) }}</td>
           <td>
-            <a
-              :href="`${rawUrlBase}${pkg.path}`"
-              class="btn-primary"
-              target="_blank"
-              >Pobierz</a
-            >
+            <span class="maintainer-link">{{ pkg.maintainer }}</span>
           </td>
-        </tr>
-        <tr v-if="filteredPackages.length === 0">
-          <td
-            colspan="5"
-            style="text-align: center; padding: 3rem; color: var(--text-muted)"
-          >
-            Nie znaleziono paczek dla wybranych filtrów.
-          </td>
+          <td class="text-dim">{{ formatSize(pkg.size) }}</td>
         </tr>
       </tbody>
     </table>
@@ -49,7 +43,7 @@
 
 <script setup lang="ts">
 import { usePackages } from "../composables/usePackages";
-const { filteredPackages, loading, rawUrlBase } = usePackages();
+const { filteredPackages, loading, rawUrlBase, selectedBranch } = usePackages();
 
 const formatSize = (b: number) => {
   if (!b) return "0 B";
@@ -59,29 +53,42 @@ const formatSize = (b: number) => {
 </script>
 
 <style scoped>
-table {
+.alpine-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 14px;
 }
-th {
+.alpine-table th {
+  background: #1a1a1a;
+  padding: 12px;
   text-align: left;
-  padding: 1rem;
   border-bottom: 2px solid var(--border);
-  color: var(--text-muted);
-  font-size: 0.9rem;
 }
-td {
-  padding: 1rem;
+.alpine-table td {
+  padding: 10px 12px;
   border-bottom: 1px solid var(--border);
 }
-.pkg-name {
-  font-weight: 600;
+
+.col-main a {
+  color: var(--text-accent);
+  text-decoration: none;
+  font-weight: bold;
+}
+.col-version {
+  color: #10b981;
+  font-family: monospace;
+}
+.text-dim {
+  color: var(--text-muted);
+}
+.text-accent {
   color: var(--text-accent);
 }
-.badge {
-  background: var(--btn-secondary);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
+.maintainer-link {
+  color: #38bdf8;
+  cursor: pointer;
+}
+.maintainer-link:hover {
+  text-decoration: underline;
 }
 </style>
