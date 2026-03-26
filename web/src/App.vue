@@ -45,7 +45,8 @@ const formatSize = (b: number) => {
 };
 
 const copyToClipboard = () => {
-  navigator.clipboard.writeText(RAW_URL_BASE);
+  const fullUrl = `${RAW_URL_BASE}/edge/community`; // Kopiujemy pełną ścieżkę
+  navigator.clipboard.writeText(fullUrl);
   alert("Repository URL copied!");
 };
 
@@ -57,7 +58,28 @@ onMounted(fetchData);
     <div class="container">
       <header class="main-header">
         <div class="logo-area">
-          <span class="logo-icon">🐢</span>
+          <div class="logo-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 4L3 18H21L12 4Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M9 14L12 9L15 14"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
           <div class="title-group">
             <h1>MatiM Arepo</h1>
             <p class="subtitle">Custom Alpine Linux Package Repository</p>

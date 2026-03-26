@@ -97,7 +97,19 @@ body {
 }
 
 .logo-icon {
-  font-size: 3rem;
+  width: 50px; /* Rozmiar ikony */
+  height: 50px;
+  color: var(--text-accent); /* Bierze kolor z Twojego Alpine Blue */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem; /* Odstęp od tekstu */
+  /* Delikatny efekt glow wokół ikony, żeby pasowało do ciemnego motywu */
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4));
+}
+.logo-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .title-group h1 {
