@@ -7,10 +7,11 @@ import FiltersBar from "./components/FiltersBar.vue";
 import PackageTable from "./components/PackageTable.vue";
 import "./assets/main.css";
 
-const { fetchData, fetchBranches } = usePackages();
+const { fetchData, fetchBranches, scanStructure } = usePackages();
 
 onMounted(async () => {
   await fetchBranches();
+  await scanStructure();
   await fetchData();
 });
 </script>

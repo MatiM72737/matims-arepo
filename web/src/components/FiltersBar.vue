@@ -84,9 +84,4 @@ select {
   padding: 8px;
   border-radius: 4px;
 }
-@media (max-width: 900px) {
-  .filter-row {
-    grid-template-columns: 1fr 1fr;
-  }
-}
 </style>
